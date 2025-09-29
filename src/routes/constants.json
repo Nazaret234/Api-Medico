@@ -1,0 +1,7 @@
+{
+  "encryptedRoutes": {
+    "users": "/users/encrypt",
+    "login": "/login/encrypt"
+  },
+  "noEncryptedRoutes": {}
+}
