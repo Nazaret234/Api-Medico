@@ -1,4 +1,3 @@
-
 import { Request, Response, NextFunction } from "express";
 import { encrypt, decrypt } from "../utils/Cryp";
 
@@ -7,18 +6,31 @@ export const decryptRequestMiddleware = (
   res: Response,
   next: NextFunction
 ): void => {
+  console.log("🔒 Middleware de desencriptación - req.body:", req.body);
   if (req.body && typeof req.body.data === "string") {
+    console.log("🔒 Desencriptando datos de la solicitud...");
     try {
-      req.body = JSON.parse(decrypt(req.body.data));
+      const decryptedData = decrypt(req.body.data);
+      req.body = JSON.parse(decryptedData);
+      console.log("✅ Datos desencriptados exitosamente:", req.body);
     } catch (err) {
+      console.error("❌ Error de desencriptación:", err);
       res.status(400).json({ error: "Invalid encrypted data" });
-      return; // 👈 Importante: cortar ejecución aquí
+      return;
     }
+  } else {
+    console.log(
+      "⚠️ No hay datos encriptados para procesar o formato incorrecto"
+    );
   }
   next();
 };
 
-export const encryptResponseMiddleware = (req: Request, res: Response, next: NextFunction) => {
+export const encryptResponseMiddleware = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const originalJson = res.json;
   res.json = function (body: any) {
     const encrypted = encrypt(JSON.stringify(body));

@@ -25,17 +25,24 @@
   "dependencies": {
     "cors": "^2.8.5",
     "crypto-js": "^4.2.0",
-    "dotenv": "^16.3.1",
+    "dotenv": "^16.6.1",
     "express": "^4.21.2",
+    "google-auth-library": "^10.3.0",
     "helmet": "^7.0.0",
-    "morgan": "^1.10.0"
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.0",
+    "passport": "^0.7.0",
+    "passport-jwt": "^4.0.1"
   },
   "devDependencies": {
     "@types/cors": "^2.8.13",
     "@types/crypto-js": "^4.2.2",
     "@types/express": "^4.17.17",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/morgan": "^1.9.4",
     "@types/node": "^20.19.17",
+    "@types/passport": "^1.0.17",
+    "@types/passport-jwt": "^4.0.1",
     "nodemon": "^3.0.1",
     "rimraf": "^5.0.1",
     "ts-node": "^10.9.1",
