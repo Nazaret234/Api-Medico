@@ -2,19 +2,22 @@
 import { Request, Response, NextFunction } from "express";
 import { encrypt, decrypt } from "../utils/Cryp";
 
-// Middleware para desencriptar el body entrante
-export const decryptRequestMiddleware = (req: Request, res: Response, next: NextFunction) => {
+export const decryptRequestMiddleware = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void => {
   if (req.body && typeof req.body.data === "string") {
     try {
       req.body = JSON.parse(decrypt(req.body.data));
     } catch (err) {
-      return res.status(400).json({ error: "Invalid encrypted data" });
+      res.status(400).json({ error: "Invalid encrypted data" });
+      return; // 👈 Importante: cortar ejecución aquí
     }
   }
   next();
 };
 
-// Middleware para encriptar la respuesta saliente
 export const encryptResponseMiddleware = (req: Request, res: Response, next: NextFunction) => {
   const originalJson = res.json;
   res.json = function (body: any) {

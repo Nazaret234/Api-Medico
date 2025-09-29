@@ -1,13 +1,13 @@
 import CryptoJS from "crypto-js";
 
-const SECRET_KEY = process.env.CRYPTO_SECRET;
+const secret = process.env.SECRET_KEY;
 
-// Encriptar texto
+const SECRET_KEY = secret as string;
+
 export function encrypt(text: string): string {
   return CryptoJS.AES.encrypt(text, SECRET_KEY).toString();
 }
 
-// Desencriptar texto
 export function decrypt(ciphertext: string): string {
   const bytes = CryptoJS.AES.decrypt(ciphertext, SECRET_KEY);
   return bytes.toString(CryptoJS.enc.Utf8);
