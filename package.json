@@ -5,7 +5,7 @@
   "main": "dist/server.js",
   "scripts": {
     "start": "node dist/server.js",
-    "dev": "nodemon src/server.ts",
+    "dev": "nodemon --exec ts-node src/app.ts",
     "build": "tsc",
     "watch": "tsc -w",
     "clean": "rimraf dist",
