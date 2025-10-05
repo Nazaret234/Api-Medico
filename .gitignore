@@ -52,3 +52,4 @@ coverage/
 # Archivos de tests
 test-results/
 coverage/
+/src/generated/prisma
