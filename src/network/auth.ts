@@ -4,7 +4,6 @@ import { validateGoogleToken as ValidateGoogleToken } from "../services/passport
 const router: Router = Router();
 
 async function validateTokenGoogle(req: Request, res: Response) {
-  console.log("🔍 Validando token de Google...", req.body);
   const { idToken } = req.body;
   if (!idToken) {
     return res.status(400).json({
