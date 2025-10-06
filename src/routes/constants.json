@@ -1,7 +1,11 @@
 {
   "encryptedRoutes": {
     "users": "/users/encrypt",
-    "login": "/login/encrypt"
+    "login": "/login/encrypt",
+    "patients": "/patients/encrypt",
+    "appointments": "/appointments/encrypt",
+    "doctors": "/doctors/encrypt"
+    
   },
   "noEncryptedRoutes": {}
 }
