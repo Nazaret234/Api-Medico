@@ -1,9 +1,6 @@
 import { Application } from "express";
 import routes from "./constants.json";
-import {
-  decryptRequestMiddleware,
-  encryptResponseMiddleware,
-} from "../middlewares/Encryp";
+import { decryptRequestMiddleware,encryptResponseMiddleware,} from "../middlewares/Encryp";
 import userNetwork from "../network/user";
 import authNetwork from "../network/auth";
 
@@ -36,6 +33,24 @@ function router(app: Application) {
     decryptRequestMiddleware,
     encryptResponseMiddleware,
     authNetwork
+  );
+  app.use(
+    routes.encryptedRoutes.patients,
+    decryptRequestMiddleware,
+    encryptResponseMiddleware,
+    patientsRoutes
+  );
+  app.use(
+    routes.encryptedRoutes.appointments,
+    decryptRequestMiddleware,
+    encryptResponseMiddleware,
+    appointmentsRoutes
+  );
+  app.use(
+    routes.encryptedRoutes.doctors,
+    decryptRequestMiddleware,
+    encryptResponseMiddleware,
+    doctorsRoutes
   );
 }
 
