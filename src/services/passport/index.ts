@@ -37,6 +37,7 @@ const validateGoogleToken = async (token: string) => {
           email: email || "",
           firstName: given_name || "",
           lastName: family_name || "",
+          image: picture || "",
           role: "PATIENT",
         },
       });
@@ -49,6 +50,7 @@ const validateGoogleToken = async (token: string) => {
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
+        picture: user.image,
       },
       SECRET_JWT_KEY || "",
       { expiresIn: "7d" }
