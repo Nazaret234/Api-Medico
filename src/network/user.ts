@@ -1,4 +1,5 @@
 import { Router, Response, Request } from "express";
+import { userController } from "../controllers/UserController";
 
 const router: Router = Router();
 
@@ -39,5 +40,9 @@ async function getUser(req: Request, res: Response) {
 }
 
 router.get("/me", getUser);
+router.post("/consent", userController.giveConsent.bind(userController));
+router.post("/withdraw-consent", userController.withdrawConsent.bind(userController));
+router.get("/datos", userController.exportUserData.bind(userController));
+router.delete("/deleteData", userController.deleteData.bind(userController));
 
 export default router;
