@@ -93,6 +93,18 @@ model UserConsent {
   consentGiven Boolean
 }
 
+model RevokedToken {
+  id              String    @id @default(cuid())
+  tokenId         String    @unique
+  userId          String
+  reason          String
+  revokedAt       DateTime  @default(now())
+  revokeAllBefore DateTime?
+  createdAt       DateTime  @default(now())
+
+  @@map("revoked_tokens")
+}
+
 model roles {
   id        Int     @id @default(autoincrement())
   role      String  @unique
