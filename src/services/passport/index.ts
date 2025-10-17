@@ -28,28 +28,52 @@ const validateGoogleToken = async (token: string) => {
     // Buscar si el usuario ya existe en la base de datos
     let user = await prisma.user.findUnique({
       where: { email: email || "" },
+      include: {
+        roles: true,
+      },
     });
 
     // Si no existe, crearlo
     if (!user) {
+      // Buscar o crear el rol PATIENT
+      let patientRole = await prisma.roles.findUnique({
+        where: { role: "PATIENT" },
+      });
+
+      if (!patientRole) {
+        // Crear el rol PATIENT si no existe
+        patientRole = await prisma.roles.create({
+          data: {
+            role: "PATIENT",
+            canGet: true,
+            canPost: true,
+            canPut: true,
+            canPatch: true,
+            canDelete: false,
+          },
+        });
+      }
+
       user = await prisma.user.create({
         data: {
           email: email || "",
           firstName: given_name || "",
           lastName: family_name || "",
-          // image: picture || "",
-          role: "PATIENT",
+          roleId: patientRole.id,
+        },
+        include: {
+          roles: true,
         },
       });
     }
 
-    // Generar JWT con los datos del usuario
+    // Generar JWT con los datos del usuario (tanto para usuarios nuevos como existentes)
     const tokenJWT = jwt.sign(
       {
-        userId: user.id,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
+        userId: user?.id,
+        email: user?.email,
+        firstName: user?.firstName,
+        lastName: user?.lastName,
         picture: picture,
       },
       SECRET_JWT_KEY || "",
