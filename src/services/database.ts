@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from "@prisma/client";
 
 // Singleton para el cliente de Prisma
 class DatabaseService {
@@ -7,8 +7,11 @@ class DatabaseService {
 
   private constructor() {
     this.prisma = new PrismaClient({
-      log: process.env.NODE_ENV === 'development' ? ['query', 'info', 'warn', 'error'] : ['error'],
-      errorFormat: 'pretty',
+      log:
+        process.env.NODE_ENV === "development"
+          ? ["query", "info", "warn", "error"]
+          : ["error"],
+      errorFormat: "pretty",
     });
   }
 
@@ -23,9 +26,9 @@ class DatabaseService {
   public async connect(): Promise<void> {
     try {
       await this.prisma.$connect();
-      console.log('✅ Conectado a la base de datos Supabase con Prisma');
+      console.log("✅ Conectado a la base de datos Supabase con Prisma");
     } catch (error) {
-      console.error('❌ Error al conectar a la base de datos:', error);
+      console.error("❌ Error al conectar a la base de datos:", error);
       throw error;
     }
   }
@@ -34,9 +37,9 @@ class DatabaseService {
   public async disconnect(): Promise<void> {
     try {
       await this.prisma.$disconnect();
-      console.log('✅ Desconectado de la base de datos');
+      console.log("✅ Desconectado de la base de datos");
     } catch (error) {
-      console.error('❌ Error al desconectar de la base de datos:', error);
+      console.error("❌ Error al desconectar de la base de datos:", error);
       throw error;
     }
   }
@@ -47,9 +50,29 @@ class DatabaseService {
       await this.prisma.$queryRaw`SELECT 1`;
       return true;
     } catch (error) {
-      console.error('❌ Health check falló:', error);
+      console.error("❌ Health check falló:", error);
       return false;
     }
+  }
+
+  // Métodos para roles
+  public async findRoleByName(roleName: string) {
+    return await this.prisma.roles.findUnique({
+      where: { role: roleName },
+    });
+  }
+
+  public async createRole(roleData: {
+    role: string;
+    canGet?: boolean;
+    canPost?: boolean;
+    canPut?: boolean;
+    canPatch?: boolean;
+    canDelete?: boolean;
+  }) {
+    return await this.prisma.roles.create({
+      data: roleData,
+    });
   }
 
   // Métodos específicos para usuarios
@@ -57,11 +80,12 @@ class DatabaseService {
     email: string;
     firstName: string;
     lastName: string;
-    role?: 'ADMIN' | 'DOCTOR' | 'PATIENT';
+    roleId: number;
   }) {
     return await this.prisma.user.create({
       data: userData,
       include: {
+        roles: true,
         patient: true,
         doctor: true,
       },
@@ -72,6 +96,7 @@ class DatabaseService {
     return await this.prisma.user.findUnique({
       where: { email },
       include: {
+        roles: true,
         patient: true,
         doctor: true,
       },
@@ -82,6 +107,7 @@ class DatabaseService {
     return await this.prisma.user.findUnique({
       where: { id },
       include: {
+        roles: true,
         patient: true,
         doctor: true,
         appointments: true,
@@ -89,16 +115,20 @@ class DatabaseService {
     });
   }
 
-  public async updateUser(id: string, userData: Partial<{
-    email: string;
-    firstName: string;
-    lastName: string;
-    role: 'ADMIN' | 'DOCTOR' | 'PATIENT';
-  }>) {
+  public async updateUser(
+    id: string,
+    userData: Partial<{
+      email: string;
+      firstName: string;
+      lastName: string;
+      roleId: number;
+    }>
+  ) {
     return await this.prisma.user.update({
       where: { id },
       data: userData,
       include: {
+        roles: true,
         patient: true,
         doctor: true,
       },
@@ -184,7 +214,7 @@ class DatabaseService {
     patientId: string;
     doctorId: string;
     dateTime: Date;
-    status?: 'SCHEDULED' | 'COMPLETED' | 'CANCELLED';
+    status?: "SCHEDULED" | "COMPLETED" | "CANCELLED";
     notes?: string;
   }) {
     const appointment = await this.prisma.appointment.create({
@@ -250,7 +280,7 @@ class DatabaseService {
         },
       },
       orderBy: {
-        dateTime: 'desc',
+        dateTime: "desc",
       },
     });
   }
@@ -270,16 +300,19 @@ class DatabaseService {
         },
       },
       orderBy: {
-        dateTime: 'desc',
+        dateTime: "desc",
       },
     });
   }
 
-  public async updateAppointment(id: string, appointmentData: Partial<{
-    dateTime: Date;
-    status: 'SCHEDULED' | 'COMPLETED' | 'CANCELLED';
-    notes: string;
-  }>) {
+  public async updateAppointment(
+    id: string,
+    appointmentData: Partial<{
+      dateTime: Date;
+      status: "SCHEDULED" | "COMPLETED" | "CANCELLED";
+      notes: string;
+    }>
+  ) {
     return await this.prisma.appointment.update({
       where: { id },
       data: appointmentData,

@@ -10,33 +10,45 @@ export class UserController extends BaseController {
   async getAllUsers(req: Request, res: Response): Promise<Response> {
     try {
       const { page = 1, limit = 10, role } = req.query;
-      
-      const where = role ? { role: role as 'ADMIN' | 'DOCTOR' | 'PATIENT' } : {};
-      
+
+      let where = {};
+      if (role) {
+        // Buscar el rol por nombre para obtener su ID
+        const roleRecord = await db.findRoleByName(role as string);
+        if (roleRecord) {
+          where = { roleId: roleRecord.id };
+        }
+      }
+
       const users = await db.prisma.user.findMany({
         where,
         skip: (Number(page) - 1) * Number(limit),
         take: Number(limit),
         include: {
+          roles: true,
           patient: true,
           doctor: true,
         },
         orderBy: {
-          createdAt: 'desc',
+          createdAt: "desc",
         },
       });
 
       const total = await db.prisma.user.count({ where });
 
-      return this.sendSuccess(res, {
-        users,
-        pagination: {
-          page: Number(page),
-          limit: Number(limit),
-          total,
-          pages: Math.ceil(total / Number(limit)),
+      return this.sendSuccess(
+        res,
+        {
+          users,
+          pagination: {
+            page: Number(page),
+            limit: Number(limit),
+            total,
+            pages: Math.ceil(total / Number(limit)),
+          },
         },
-      }, "Usuarios obtenidos exitosamente");
+        "Usuarios obtenidos exitosamente"
+      );
     } catch (error) {
       return this.handleError(res, error);
     }
@@ -69,11 +81,15 @@ export class UserController extends BaseController {
    */
   async createUser(req: Request, res: Response): Promise<Response> {
     try {
-      const { email, firstName, lastName, role = 'PATIENT' } = req.body;
+      const { email, firstName, lastName, role = "PATIENT" } = req.body;
 
       // Validar datos requeridos
       if (!email || !firstName || !lastName) {
-        return this.sendError(res, "Email, nombre y apellido son requeridos", 400);
+        return this.sendError(
+          res,
+          "Email, nombre y apellido son requeridos",
+          400
+        );
       }
 
       // Verificar si el email ya existe
@@ -82,11 +98,17 @@ export class UserController extends BaseController {
         return this.sendError(res, "El email ya está registrado", 400);
       }
 
+      // Buscar el rol por nombre para obtener su ID
+      const roleRecord = await db.findRoleByName(role);
+      if (!roleRecord) {
+        return this.sendError(res, "Rol no válido", 400);
+      }
+
       const user = await db.createUser({
         email,
         firstName,
         lastName,
-        role: role as 'PATIENT',
+        roleId: roleRecord.id,
       });
 
       return this.sendSuccess(res, user, "Usuario creado exitosamente", 201);
@@ -125,7 +147,15 @@ export class UserController extends BaseController {
       if (email) updateData.email = email;
       if (firstName) updateData.firstName = firstName;
       if (lastName) updateData.lastName = lastName;
-      if (role) updateData.role = role as 'ADMIN' | 'DOCTOR' | 'PATIENT';
+
+      if (role) {
+        // Buscar el rol por nombre para obtener su ID
+        const roleRecord = await db.findRoleByName(role);
+        if (!roleRecord) {
+          return this.sendError(res, "Rol no válido", 400);
+        }
+        updateData.roleId = roleRecord.id;
+      }
 
       const user = await db.updateUser(id, updateData);
 
@@ -166,7 +196,7 @@ export class UserController extends BaseController {
   async getProfile(req: Request, res: Response): Promise<Response> {
     try {
       const userId = (req as any).user?.id;
-      
+
       if (!userId) {
         return this.sendError(res, "Usuario no autenticado", 401);
       }
