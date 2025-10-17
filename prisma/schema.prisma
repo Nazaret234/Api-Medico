@@ -23,6 +23,11 @@ model User {
   @@map("users")
 }
 
+model UserConsent {
+    userId       String @id
+    consentGiven Boolean
+}
+
 model Patient {
   id             String               @id @default(cuid())
   userId         String               @unique
