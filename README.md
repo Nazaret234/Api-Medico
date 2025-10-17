@@ -88,9 +88,73 @@ src/
 - `GET /` - Estado general de la API
 - `GET /api/health` - Estado detallado del sistema
 
-## Variables de Entorno
 
-Consulta el archivo `.env.example` para ver todas las variables de entorno disponibles.
+## Configuración de la base de datos (Prisma)
+
+se utilizo Prisma como ORM y PostgreSQL para la base de datos.
+
+1) Variables de entorno 
+
+- `DATABASE_URL`: la URL de conexión a PostgreSQL. Ejemplo de formato:
+
+	```text
+	postgresql://<user>:<password>@<host>:<port>/<database>
+	```
+
+- Además de `DATABASE_URL`, mi `.env` contiene otras claves que el proyecto usa, por ejemplo `SECRET_JWT_KEY` y `SECRET_KEY`.
+
+2) Generar el cliente de Prisma
+
+Después de añadir `DATABASE_URL` en `.env` :
+
+```bash
+npx prisma generate
+```
+
+3) Aplicar el esquema / migraciones
+
+se creo una base de datos con
+
+```bash
+npx prisma db push
+```
+
+4) Ver la base de datos en el navegador
+
+Uso Prisma Studio para inspeccionar tablas y datos:
+
+```bash
+npx prisma studio
+```
+
+5) Script de verificación que incluí
+
+Se incluyo `scripts/migrate.ts` para comprobar la conexión y poder ejecutar seeds si hace falta. Para ejecutarlo:
+
+```bash
+ts-node scripts/migrate.ts
+```
+
+6) Notas sobre Supabase / producción
+
+- Si se usa Supabase pega la `DATABASE_URL` que te da Supabase en el `.env`.
+- Si la contraseña tiene caracteres especiales, recuerda que deben ser URL-encoded (por ejemplo `@` → `%40`).
+
+7) Verificación rápida
+
+- Para probar el proyecto hay que ejecutat
+
+```bash
+npm run dev
+```
+
+Si Prisma no puede conectar verás errores relacionados con `DATABASE_URL` en la consola.
+
+8) Problemas comunes
+
+- Error de autenticación: revisa user/password en `DATABASE_URL`.
+- Timeouts o conexión denegada: comprueba que el host/puerto estén accesibles (especialmente si la DB está en la nube).
+
 
 ## Desarrollo
 

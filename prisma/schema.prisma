@@ -1,0 +1,129 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String        @id @default(cuid())
+  email        String        @unique
+  firstName    String
+  lastName     String
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  roleId       Int
+  appointments Appointment[]
+  doctor       Doctor?
+  patient      Patient?
+  roles        roles         @relation(fields: [roleId], references: [id])
+
+  @@map("users")
+}
+
+model Patient {
+  id             String               @id @default(cuid())
+  userId         String               @unique
+  dateOfBirth    DateTime
+  phone          String?
+  address        String?
+  medicalHistory String?
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+  appointments   PatientAppointment[]
+  user           User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("patients")
+}
+
+model Doctor {
+  id            String              @id @default(cuid())
+  userId        String              @unique
+  specialty     String
+  licenseNumber String              @unique
+  phone         String?
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  appointments  DoctorAppointment[]
+  user          User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("doctors")
+}
+
+model Appointment {
+  id        String               @id @default(cuid())
+  patientId String
+  doctorId  String
+  dateTime  DateTime
+  status    AppointmentStatus    @default(SCHEDULED)
+  notes     String?
+  createdAt DateTime             @default(now())
+  updatedAt DateTime             @updatedAt
+  user      User                 @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  doctor    DoctorAppointment[]
+  patient   PatientAppointment[]
+
+  @@map("appointments")
+}
+
+model PatientAppointment {
+  patientId     String
+  appointmentId String
+  appointment   Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  patient       Patient     @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  @@id([patientId, appointmentId])
+  @@map("patient_appointments")
+}
+
+model DoctorAppointment {
+  doctorId      String
+  appointmentId String
+  appointment   Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  doctor        Doctor      @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+
+  @@id([doctorId, appointmentId])
+  @@map("doctor_appointments")
+}
+
+model UserConsent {
+  userId       String  @id
+  consentGiven Boolean
+}
+
+model RevokedToken {
+  id              String    @id @default(cuid())
+  tokenId         String    @unique
+  userId          String
+  reason          String
+  revokedAt       DateTime  @default(now())
+  revokeAllBefore DateTime?
+  createdAt       DateTime  @default(now())
+
+  @@map("revoked_tokens")
+}
+
+model roles {
+  id        Int     @id @default(autoincrement())
+  role      String  @unique
+  canGet    Boolean @default(false)
+  canPost   Boolean @default(false)
+  canPut    Boolean @default(false)
+  canPatch  Boolean @default(false)
+  canDelete Boolean @default(false)
+  users     User[]
+}
+
+enum Role {
+  ADMIN
+  DOCTOR
+  PATIENT
+}
+
+enum AppointmentStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+}

@@ -13,8 +13,8 @@ export class BaseController {
   ): Response {
     const response: ApiResponse<T> = {
       success: true,
-      message,
-      data,
+      ...(message && { message }),
+      ...(data !== undefined && { data }),
     };
     return res.status(statusCode).json(response);
   }

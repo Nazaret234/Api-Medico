@@ -1,24 +1,46 @@
 import { Router, Request, Response } from "express";
+import db from "../services/database";
 
 const router = Router();
 
-/**
- * GET /api/health
- * Endpoint para verificar el estado de la API
- */
+// Health check básico
 router.get("/", (req: Request, res: Response) => {
-  const healthCheck = {
-    uptime: process.uptime(),
-    responseTime: process.hrtime(),
-    message: "API funcionando correctamente",
-    timestamp: new Date().toISOString(),
+  res.json({
     status: "OK",
-  };
-
-  res.status(200).json({
-    success: true,
-    data: healthCheck,
+    service: "Backend API",
+    timestamp: new Date().toISOString(),
+    database: "Supabase + Prisma",
   });
+});
+
+// Health check de la base de datos
+router.get("/database", async (req: Request, res: Response) => {
+  try {
+    const isHealthy = await db.healthCheck();
+    
+    if (isHealthy) {
+      res.json({
+        status: "OK",
+        database: "Connected",
+        timestamp: new Date().toISOString(),
+        provider: "Supabase PostgreSQL",
+      });
+    } else {
+      res.status(503).json({
+        status: "ERROR",
+        database: "Disconnected",
+        timestamp: new Date().toISOString(),
+        error: "Database connection failed",
+      });
+    }
+  } catch (error) {
+    res.status(503).json({
+      status: "ERROR",
+      database: "Error",
+      timestamp: new Date().toISOString(),
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
 });
 
 export default router;
