@@ -28,6 +28,11 @@ model User {
   @@map("users")
 }
 
+model UserConsent {
+    userId       String @id
+    consentGiven Boolean
+}
+
 // Modelo para Pacientes
 model Patient {
   id             String   @id @default(cuid())
