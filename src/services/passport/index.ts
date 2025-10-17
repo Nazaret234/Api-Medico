@@ -68,13 +68,21 @@ const validateGoogleToken = async (token: string) => {
     }
 
     // Generar JWT con los datos del usuario (tanto para usuarios nuevos como existentes)
+    // Incluir JWT ID único para revocación de tokens (Zero Trust)
+    const jwtId = `${user?.id}_${Date.now()}_${Math.random()
+      .toString(36)
+      .substr(2, 9)}`;
+
     const tokenJWT = jwt.sign(
       {
         userId: user?.id,
         email: user?.email,
         firstName: user?.firstName,
         lastName: user?.lastName,
+        roleId: user?.roleId,
+        roleName: user?.roles.role,
         picture: picture,
+        jti: jwtId, // JWT ID para identificación única del token
       },
       SECRET_JWT_KEY || "",
       { expiresIn: "7d" }
