@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { BaseController } from "./BaseController";
 import db from "../services/database";
 import { ApiResponse } from "../types";
+import { User } from '../../dist/types/index';
 
 export class UserController extends BaseController {
   /**
@@ -192,7 +193,7 @@ export class UserController extends BaseController {
   // Nuevo método para eliminar datos del usuario (derecho al olvido)
       async deleteData(req: Request, res: Response): Promise<Response> {
 
-      const { userId } = req.params;
+      const { userId } = req.user as { userId: string };
   
       // Validar que userId esté definido y sea una cadena
       if (!userId || typeof userId !== 'string') {
@@ -245,7 +246,7 @@ export class UserController extends BaseController {
               email: user.email,
               firstName: user.firstName,
               lastName: user.lastName,
-              role: user.role
+              role: user.roleId
           };
   
           // Configurar el encabezado para la descarga
